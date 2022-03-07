@@ -62,7 +62,7 @@ export default function App() {
   };
 
   const _fastAccelerometer = () => {
-    Accelerometer.setUpdateInterval(16);
+    Accelerometer.setUpdateInterval(5);
   };
 
   const tick = () => {
@@ -95,7 +95,7 @@ export default function App() {
   };
 
   const _fast = () => {
-    Gyroscope.setUpdateInterval(16);
+    Gyroscope.setUpdateInterval(5);
   };
 
   const _subscribe = () => {
