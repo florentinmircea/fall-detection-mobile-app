@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ImageBackground,
   StyleSheet,
@@ -12,10 +12,34 @@ import {
 } from "react-native";
 import background from "../assets/background.jpg";
 import { Accelerometer, Gyroscope } from "expo-sensors";
+import axios from "axios";
+import { Audio } from "expo-av";
+import useCountDown from "react-countdown-hook";
 
 const image = background;
 
+const initialTimeBeforeAlert = 30 * 1000; // initial time in milliseconds, defaults to 60000
+const timeUnitInterval = 1000; // interval to change remaining time amount, defaults to 1000
+
 export default function HomeScreen({ navigation }) {
+  const [timeLeft, { start, pause, resume, reset }] = useCountDown(
+    initialTimeBeforeAlert,
+    timeUnitInterval
+  );
+
+  const didMount = useRef(false);
+
+  useEffect(() => {
+    if (didMount.current) {
+      if (timeLeft <= 0) {
+        Alert.alert("call");
+        reset();
+      }
+    } else {
+      didMount.current = true;
+    }
+  }, [timeLeft]);
+
   const [serviceStarted, setServiceStarted] = useState(false);
 
   const [resultant_acc_vector, setResultant_acc_vector] = useState(0);
@@ -35,13 +59,54 @@ export default function HomeScreen({ navigation }) {
     z: 0,
   });
   const [subscription, setSubscription] = useState(null);
-  const [timer, setTimer] = useState();
-  const [timerStarted, setTimerStarted] = useState(false);
   const [counter, setCounter] = useState(0);
   let t;
   const [fallDetected, setFallDetected] = useState(false);
   const [userOK, setUserOK] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const [predictionResults, setPredictionResults] = useState([]);
+  const [xyzData, setXyzData] = useState([]);
+  const [done, setDone] = useState(false);
+
+  const webServiceUrl =
+    "https://ussouthcentral.services.azureml.net/workspaces/74deb8d5935745aea0b3101bc2519aa7/services/d10d5c59720c43dcb9765f4c364375b8/execute?api-version=2.0&details=true";
+
+  const eventPrediction = async (xyz) => {
+    const token =
+      "QNKvXi9Un4lGvoYcXvB+ywUFwpKWcUud3Z00QpODODZHwp22fckbhCxedpgFF0T/F5czC1P5/DWp+U1fprPpoA==";
+    const config = {
+      headers: { Authorization: `Bearer ${token}` },
+    };
+    const body = {
+      Inputs: {
+        input1: {
+          ColumnNames: ["xAxis", "yAxis", "zAxis"],
+          Values: [],
+        },
+      },
+      GlobalParameters: {},
+    };
+    for (let i = 0; i < xyz.length; i++) {
+      body.Inputs.input1.Values.push(xyz[i]);
+    }
+    // console.log(body);
+    const response = await axios.post(webServiceUrl, body, config);
+    // console.log(response.status.toString() === "200");
+    // console.log(response.data.Results.output1.value.Values.length);
+    let results = [];
+    for (
+      let i = 0;
+      i < response.data.Results.output1.value.Values.length;
+      i++
+    ) {
+      let current = response.data.Results.output1.value.Values[i];
+      results.push(current);
+    }
+    if (results.length !== 0) {
+      setPredictionResults(results);
+    }
+  };
 
   const handleClick = () => {
     if (serviceStarted === false) {
@@ -55,25 +120,25 @@ export default function HomeScreen({ navigation }) {
       _unsubscribe();
     }
     setServiceStarted(!serviceStarted);
-  };
 
-  const _slowAccelerometer = () => {
-    Accelerometer.setUpdateInterval(1000);
+    // setFallDetected(true);
+    // setModalVisible(true);
+    // playSound();
+    // start();
+
+    // eventPrediction([
+    //   ["1", "1", "1"],
+    //   ["1", "0", "2"],
+    // ]);
   };
 
   const _fastAccelerometer = () => {
-    Accelerometer.setUpdateInterval(5);
+    Accelerometer.setUpdateInterval(16);
   };
 
   const tick = () => {
     setCounter((x) => x + 1);
   };
-
-  //   useEffect(() => {
-  //     let timer = setInterval(() => console.log('fire!'), 1000);
-
-  //     return () => clearInterval(timer)
-  // }, [])
 
   const _subscribeAccelerometer = () => {
     setSubscriptionAccelerometer(
@@ -90,12 +155,8 @@ export default function HomeScreen({ navigation }) {
 
   const { x, y, z } = dataAccelerometer;
 
-  const _slow = () => {
-    Gyroscope.setUpdateInterval(1000);
-  };
-
   const _fast = () => {
-    Gyroscope.setUpdateInterval(5);
+    Gyroscope.setUpdateInterval(16);
   };
 
   const _subscribe = () => {
@@ -125,25 +186,26 @@ export default function HomeScreen({ navigation }) {
     let v = Math.abs(Math.sqrt(x * x + y * y + z * z));
     if (v > acceleration_threshold) {
       console.log(v);
+      xyzData.push([x.toString(), y.toString(), z.toString()]);
       setResultant_acc_vector(v);
-      setTimerStarted(true);
       setCounter(0);
     }
     if (
       v < acceleration_threshold &&
       counter >= 25 &&
-      resultant_acc_vector > acceleration_threshold
+      resultant_acc_vector > acceleration_threshold &&
+      done === false
     ) {
-      setFallDetected(true);
-      setModalVisible(true);
-      console.log(v.toString() + " fall detected");
+      xyzData.push([x.toString(), y.toString(), z.toString()]);
+      setDone(true);
+      console.log(xyzData);
+      eventPrediction(xyzData);
+      setXyzData([]);
 
-      // setTimeout(() => {
-      //   if(v<=acceleration_threshold)
-      //   {
-
-      //   }
-      // }, 2500);
+      //   console.log(xyzData);
+      //   setFallDetected(true);
+      //   setModalVisible(true);
+      //   console.log(v.toString() + " fall detected");
     }
   }, [dataAccelerometer]);
 
@@ -154,8 +216,49 @@ export default function HomeScreen({ navigation }) {
       setCounter(0);
       setResultant_acc_vector(0);
       setModalVisible(false);
+      setPredictionResults([]);
+      reset();
+      setDone(false);
+      return sound
+        ? () => {
+            console.log("Unloading Sound");
+            sound.unloadAsync();
+          }
+        : undefined;
     }
   }, [fallDetected, userOK]);
+
+  useEffect(() => {
+    for (let i = 0; i < predictionResults.length; i++) {
+      console.log(predictionResults[i][1]);
+      if (predictionResults[i][1] > 0.6) {
+        setFallDetected(true);
+        setModalVisible(true);
+        playSound();
+        start();
+      }
+    }
+    // xyzData.length = 0;
+    // predictionResults.length = 0;
+    // setDone(false);
+  }, [predictionResults]);
+
+  const [sound, setSound] = useState();
+
+  async function playSound() {
+    console.log("Loading Sound");
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+    });
+    const { sound } = await Audio.Sound.createAsync(
+      require("../assets/alarm.mp3")
+    );
+    setSound(sound);
+
+    console.log("Playing Sound");
+    // await sound.setIsLoopingAsync(true);
+    await sound.playAsync();
+  }
 
   return (
     <View style={styles.container}>
@@ -200,6 +303,7 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>Fall detected!</Text>
+              <Text style={styles.textEmergency}>{timeLeft / 1000}</Text>
               <Pressable
                 style={[styles.button, styles.buttonClose]}
                 onPress={() => setUserOK(true)}
@@ -263,7 +367,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 35,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -283,11 +387,13 @@ const styles = StyleSheet.create({
     height: 70,
   },
   buttonClose: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "green",
+    borderColor: "#000000",
+    borderWidth: 2,
   },
   textStyle: {
     marginTop: 15,
-    color: "white",
+    color: "black",
     fontWeight: "bold",
     textAlign: "center",
     fontSize: 20,
@@ -296,5 +402,10 @@ const styles = StyleSheet.create({
     fontSize: 40,
     marginBottom: 15,
     textAlign: "center",
+  },
+  textEmergency: {
+    fontSize: 40,
+    color: "red",
+    marginLeft: 7,
   },
 });
