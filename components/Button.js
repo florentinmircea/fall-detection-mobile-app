@@ -1,38 +1,60 @@
-import React from "react";
-import { Text, View, StyleSheet, Pressable } from "react-native";
+import React from 'react';
+import { StyleSheet, Pressable, Text } from 'react-native';
 
-export default function Button(props) {
-  const { onPress, title = "Save", data } = props;
+const Button = ({
+  title,
+  backgroundColor = '#000',
+  titleColor = '#fff',
+  titleSize = 14,
+  onPress,
+  width = '100%',
+  containerStyle
+}) => {
   return (
-    <Pressable style={styles.button} onPress={onPress}>
-      <Text style={styles.text}>{title}</Text>
-      <Text style={styles.textData}>{data}</Text>
+    <Pressable
+      onPress={onPress}
+      style={args => {
+        if (args.pressed) {
+          return [
+            styles.base,
+            {
+              opacity: 0.5,
+              backgroundColor,
+              width
+            },
+            containerStyle
+          ];
+        }
+
+        return [
+          styles.base,
+          {
+            opacity: 1,
+            backgroundColor,
+            width
+          },
+          containerStyle
+        ];
+      }}
+    >
+      <Text style={[styles.text, { color: titleColor, fontSize: titleSize }]}>
+        {title}
+      </Text>
     </Pressable>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  button: {
-    // alignItems: "center",
-    // justifyContent: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 20,
-    elevation: 3,
-    backgroundColor: "grey",
-    margin: 10,
-  },
   text: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: "bold",
-    letterSpacing: 0.25,
-    color: "white",
+    fontWeight: '600'
   },
-  textData: {
-    fontSize: 16,
-    lineHeight: 21,
-    letterSpacing: 0.25,
-    color: "white",
-  },
+  base: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 42,
+    borderRadius: 4,
+    paddingHorizontal: 12
+  }
 });
+
+export default Button;

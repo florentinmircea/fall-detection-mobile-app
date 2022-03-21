@@ -1,15 +1,9 @@
 import { StatusBar } from "expo-status-bar";
-import {
-  ImageBackground,
-  StyleSheet,
-  View,
-  Text,
-  Pressable,
-} from "react-native";
+import { ImageBackground, StyleSheet, View } from "react-native";
 import background from "../assets/background.jpg";
-import Button from "./Button";
-import Modal from "./Modal";
-import { useState, useEffect } from "react";
+import Button from "../components/SettingsButtonField";
+import Modal from "../components/SettingsFieldModal";
+import { useState } from "react";
 
 const image = background;
 

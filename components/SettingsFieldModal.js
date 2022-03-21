@@ -86,7 +86,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 35,
     alignItems: "center",
-    // justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -123,7 +122,6 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 25,
-    // marginBottom: 15,
     textAlign: "center",
   },
   modalOverlay: {
