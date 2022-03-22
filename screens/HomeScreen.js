@@ -320,6 +320,12 @@ export default function HomeScreen({ navigation }) {
         >
           <Text style={styles.buttonText}>Settings</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonSettings}
+          onPressIn={() => navigation.navigate("Map")}
+        >
+          <Text style={styles.buttonText}>Map</Text>
+        </TouchableOpacity>
         <Modal
           animationType="slide"
           transparent={true}
