@@ -56,6 +56,7 @@ export default function Button(props) {
                     style={styles.input}
                     onChangeText={onChangeText}
                     value={data}
+                    autoCapitalize="none"
                   />
                 )}
                 <Pressable

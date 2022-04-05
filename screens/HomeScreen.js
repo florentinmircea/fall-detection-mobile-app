@@ -293,7 +293,9 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar style="auto" />
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        <Text style={styles.text}>Timer {counter}</Text>
+        {serviceStarted === true ? (
+          <Text style={styles.text}>Timer {counter}</Text>
+        ) : null}
         {serviceStarted === true ? (
           <Text style={styles.text}>
             Accelerometer x: {round(x)} y: {round(y)} z: {round(z)}
