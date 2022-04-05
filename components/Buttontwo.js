@@ -21,8 +21,9 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: "grey",
     margin: 10,
-    width: "50%",
+    width: "40%",
     justifyContent: "center",
+    alignItems: "center",
   },
   text: {
     fontSize: 16,

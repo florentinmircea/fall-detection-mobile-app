@@ -1,22 +1,22 @@
-import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import React from "react";
+import { Pressable, StyleSheet } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 
 const IconButton = ({ color, size, onPress, name }) => {
   return (
     <Pressable
-      style={args => {
+      style={(args) => {
         if (args.pressed) {
           return [
             styles.base,
             {
               opacity: 0.5,
-              backgroundColor: 'transparent'
-            }
+              backgroundColor: "transparent",
+            },
           ];
         }
 
-        return [styles.base, { opacity: 1, backgroundColor: 'transparent' }];
+        return [styles.base, { opacity: 1, backgroundColor: "transparent" }];
       }}
       onPress={onPress}
     >
@@ -27,9 +27,11 @@ const IconButton = ({ color, size, onPress, name }) => {
 
 const styles = StyleSheet.create({
   base: {
-    alignItems: 'center',
-    justifyContent: 'center'
-  }
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 30,
+    marginLeft: 20,
+  },
 });
 
 export default IconButton;

@@ -7,10 +7,24 @@ import { useState } from "react";
 import PersonCard from "../components/PersonCard";
 import Buttontwo from "../components/Buttontwo";
 import AddPersonButton from "../components/AddPersonButton";
+import { AuthenticatedUserContext } from "../navigation/AuthenticatedUserProvider";
+import Firebase from "../config/firebase";
+import React, { useContext, useEffect } from "react";
+import { getDatabase, ref, set } from "firebase/database";
+import { IconButton } from "../components";
 
 const image = background;
 
 export default function SettingsScreen({ navigation }) {
+  const { user } = useContext(AuthenticatedUserContext);
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const [nameModalVisible, setNameModalVisible] = useState(false);
   const [emailModalVisible, setEmailModalVisible] = useState(false);
   const [phoneModalVisible, setPhoneModalVisible] = useState(false);
@@ -26,8 +40,10 @@ export default function SettingsScreen({ navigation }) {
     setEmailModalVisible(true);
   };
 
-  const handlePhoneClick = () => {
-    setPhoneModalVisible(true);
+  const handlePhoneClick = (data, key) => {
+    // setPhoneModalVisible(true);
+    // console.log("data" + data.email);
+    navigation.navigate("EmergencyPersonCard", { data: data, key: key });
   };
 
   const handleNameModalClose = () => {
@@ -46,12 +62,56 @@ export default function SettingsScreen({ navigation }) {
     navigation.navigate("EmergencyPersonCard");
   };
 
+  const [itemsArray, setItemsArray] = useState([]);
+  const [keys, setKeys] = useState([]);
+
+  useEffect(() => {
+    try {
+      let keyArr = [];
+      Firebase.database()
+        .ref("users/" + user.uid + "/contacts")
+        .on("value", (snapshot) => {
+          snapshot.forEach(function (snapshot3) {
+            console.log(snapshot3.key); // e.g. "-Kb9...gkE"
+            keyArr.push(snapshot3.key);
+          });
+        });
+      setKeys(keyArr);
+    } catch (err) {
+      console.log(err.message);
+    }
+    try {
+      Firebase.database()
+        .ref("users/" + user.uid + "/contacts")
+        .on("value", (snapshot) => {
+          let data = snapshot.val();
+          // console.log(snapshot.key);
+          if (data !== null) {
+            const items = Object.values(data);
+            setItemsArray(items);
+          }
+        });
+    } catch (err) {
+      console.log(err.message);
+    }
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
+      {console.log(keys)}
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
         <View style={styles.container2}>
-          <AddPersonButton onPress={handleNewContact} />
+          <IconButton
+            name="logout"
+            size={24}
+            color="#fff"
+            onPress={handleSignOut}
+          />
+          <AddPersonButton
+            disabled={itemsArray.length > 2}
+            onPress={handleNewContact}
+          />
         </View>
         <Button
           onPress={handleNameClick}
@@ -70,11 +130,25 @@ export default function SettingsScreen({ navigation }) {
         />  */}
         {/* <PersonCard /> */}
         <View style={styles.container3}>
-          <Buttontwo
+          {itemsArray.map((item, index) => {
+            return (
+              <Buttontwo
+                onPress={handlePhoneClick.bind(this, item, keys[index])}
+                title="Emergency person phone number"
+                data={item}
+              />
+            );
+          })}
+          {/* <Buttontwo
             onPress={handlePhoneClick}
             title="Emergency person phone number"
             data={emergencyPhone.slice(2, emergencyPhone.length)}
           />
+          <Buttontwo
+            onPress={handlePhoneClick}
+            title="Emergency person phone number"
+            data={emergencyPhone.slice(2, emergencyPhone.length)}
+          /> */}
         </View>
 
         <Modal
@@ -114,8 +188,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  container2: { alignItems: "flex-end" },
-  container3: { flex: 0.5, justifyContent: "center", alignItems: "center" },
+  container2: {
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexDirection: "row",
+  },
+  container3: { flex: 0.5, alignItems: "center" },
   image: {
     flex: 1,
     // justifyContent: "center",

@@ -16,7 +16,7 @@ import {
   Pressable,
 } from "react-native";
 import background from "../assets/background.jpg";
-import { Accelerometer, Gyroscope } from "expo-sensors";
+import { Accelerometer } from "expo-sensors";
 import axios from "axios";
 import { Audio } from "expo-av";
 import useCountDown from "react-countdown-hook";
@@ -69,12 +69,6 @@ export default function HomeScreen({ navigation }) {
   const [subscriptionAccelerometer, setSubscriptionAccelerometer] =
     useState(null);
 
-  const [data, setData] = useState({
-    x: 0,
-    y: 0,
-    z: 0,
-  });
-  const [subscription, setSubscription] = useState(null);
   const [counter, setCounter] = useState(0);
   let t;
   const [fallDetected, setFallDetected] = useState(false);
@@ -127,13 +121,10 @@ export default function HomeScreen({ navigation }) {
   const handleClick = () => {
     if (serviceStarted === false) {
       _subscribeAccelerometer();
-      _subscribe();
       _fastAccelerometer();
-      _fast();
       t = setInterval(() => tick(), 100);
     } else {
       _unsubscribeAccelerometer();
-      _unsubscribe();
     }
     setServiceStarted(!serviceStarted);
 
@@ -170,25 +161,6 @@ export default function HomeScreen({ navigation }) {
   };
 
   const { x, y, z } = dataAccelerometer;
-
-  const _fast = () => {
-    Gyroscope.setUpdateInterval(16);
-  };
-
-  const _subscribe = () => {
-    setSubscription(
-      Gyroscope.addListener((gyroscopeData) => {
-        setData(gyroscopeData);
-      })
-    );
-  };
-
-  const _unsubscribe = () => {
-    subscription && subscription.remove();
-    setSubscription(null);
-  };
-
-  const { x: xg, y: yg, z: zg } = data;
 
   function round(n) {
     if (!n) {
@@ -293,17 +265,10 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar style="auto" />
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        {serviceStarted === true ? (
-          <Text style={styles.text}>Timer {counter}</Text>
-        ) : null}
+        <Text style={styles.text}>Timer {counter}</Text>
         {serviceStarted === true ? (
           <Text style={styles.text}>
             Accelerometer x: {round(x)} y: {round(y)} z: {round(z)}
-          </Text>
-        ) : null}
-        {serviceStarted === true ? (
-          <Text style={styles.text}>
-            Gyroscope x: {round(xg)} y: {round(yg)} z: {round(zg)}
           </Text>
         ) : null}
         <TouchableOpacity
