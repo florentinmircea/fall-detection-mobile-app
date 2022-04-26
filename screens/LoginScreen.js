@@ -26,6 +26,7 @@ export default function LoginScreen({ navigation }) {
   };
 
   const onLogin = async () => {
+    setLoginError(false);
     try {
       if (email !== "" && password !== "") {
         await auth.signInWithEmailAndPassword(email, password);
@@ -91,7 +92,7 @@ export default function LoginScreen({ navigation }) {
       <RNButton
         onPress={() => navigation.navigate("Signup")}
         title="Go to Signup"
-        color="#fff"
+        color="green"
       />
     </View>
   );
@@ -102,9 +103,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#003f5c",
     // paddingTop: 50,
-    marginTop: -100,
+    paddingTop: 40,
     paddingHorizontal: 12,
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
   title: {
     fontSize: 24,

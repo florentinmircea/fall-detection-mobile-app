@@ -13,6 +13,8 @@ import React, { useContext, useEffect } from "react";
 import { getDatabase, ref, set } from "firebase/database";
 import { IconButton } from "../components";
 
+const auth = Firebase.auth();
+
 const image = background;
 
 export default function SettingsScreen({ navigation }) {
@@ -113,11 +115,11 @@ export default function SettingsScreen({ navigation }) {
             onPress={handleNewContact}
           />
         </View>
-        <Button
+        {/* <Button
           onPress={handleNameClick}
           title="Your emergency display name"
           data={userName}
-        />
+        /> */}
         {/* <Button
           onPress={handleEmailClick}
           title="Emergency person email"

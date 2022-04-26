@@ -91,7 +91,7 @@ export default function SignupScreen({ navigation }) {
       <RNButton
         onPress={() => navigation.navigate("Login")}
         title="Go to Login"
-        color="#fff"
+        color="green"
       />
     </View>
   );
@@ -102,9 +102,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#003f5c",
     // paddingTop: 50,
-    marginTop: -100,
+    paddingTop: 40,
     paddingHorizontal: 12,
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
   title: {
     fontSize: 24,
