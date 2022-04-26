@@ -49,12 +49,52 @@ export default function HomeScreen({ navigation }) {
     if (didMount.current) {
       if (timeLeft <= 0) {
         Alert.alert("call");
+        sendMessages();
         reset();
       }
     } else {
       didMount.current = true;
     }
   }, [timeLeft]);
+
+  const sendMessages = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("Permission to access location was denied");
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    let contacts = [];
+    try {
+      Firebase.database()
+        .ref("users/" + user.uid + "/contacts")
+        .on("value", (snapshot) => {
+          let data = snapshot.val();
+          // console.log(snapshot.key);
+          if (data !== null) {
+            const items = Object.values(data);
+            contacts = items;
+          }
+        });
+    } catch (err) {
+      console.log(err.message);
+    }
+    if (contacts.length === 1) {
+      contacts.push(contacts[0]);
+    }
+    const body = {
+      userName: user.email,
+      phoneNumbers: contacts,
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+    const response = await axios.post(
+      "http://localhost:3001/sendMessage",
+      body
+    );
+    console.log(response.data.status);
+  };
 
   const [serviceStarted, setServiceStarted] = useState(false);
 
@@ -120,6 +160,7 @@ export default function HomeScreen({ navigation }) {
 
   const handleClick = () => {
     if (serviceStarted === false) {
+      sendMessages();
       _subscribeAccelerometer();
       _fastAccelerometer();
       t = setInterval(() => tick(), 100);
