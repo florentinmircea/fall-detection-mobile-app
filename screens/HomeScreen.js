@@ -97,8 +97,9 @@ export default function HomeScreen({ navigation }) {
     };
     console.log(body);
     try {
+      // "http://192.168.0.148:3001/sendMessage"
       const response = await axios.post(
-        "http://192.168.0.148:3001/sendMessage",
+        "https://fall-detection-api.loca.lt/",
         body
       );
       console.log(response.data);
