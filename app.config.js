@@ -2,7 +2,7 @@ import "dotenv/config";
 
 export default {
   expo: {
-    name: "fall-detection",
+    name: "Fall Detection",
     slug: "fall-detection",
     version: "1.0.0",
     orientation: "portrait",
@@ -18,12 +18,16 @@ export default {
     assetBundlePatterns: ["**/*"],
     ios: {
       supportsTablet: true,
+      bundleIdentifier: "com.florentin.falldetection",
+      buildNumber: "1.0.0",
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#FFFFFF",
       },
+      package: "com.florentin.falldetection",
+      versionCode: 1,
     },
     web: {
       favicon: "./assets/favicon.png",
