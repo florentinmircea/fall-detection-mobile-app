@@ -20,6 +20,7 @@ import { Accelerometer } from "expo-sensors";
 import axios from "axios";
 import { Audio } from "expo-av";
 import useCountDown from "react-countdown-hook";
+import * as Location from "expo-location";
 
 const auth = Firebase.auth();
 
@@ -49,7 +50,7 @@ export default function HomeScreen({ navigation }) {
     if (didMount.current) {
       if (timeLeft <= 0) {
         Alert.alert("call");
-        sendMessages();
+        // sendMessages(); working but commented during development
         reset();
       }
     } else {
@@ -66,6 +67,7 @@ export default function HomeScreen({ navigation }) {
 
     let location = await Location.getCurrentPositionAsync({});
     let contacts = [];
+    let phoneNr = [];
     try {
       Firebase.database()
         .ref("users/" + user.uid + "/contacts")
@@ -80,20 +82,29 @@ export default function HomeScreen({ navigation }) {
     } catch (err) {
       console.log(err.message);
     }
-    if (contacts.length === 1) {
-      contacts.push(contacts[0]);
+    console.log(contacts);
+    for (let i = 0; i < contacts.length; i++) {
+      phoneNr.push(contacts[i].phone);
+    }
+    if (phoneNr.length === 1) {
+      phoneNr.push(phoneNr[0]);
     }
     const body = {
       userName: user.email,
-      phoneNumbers: contacts,
+      phoneNumbers: phoneNr,
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
     };
-    const response = await axios.post(
-      "http://localhost:3001/sendMessage",
-      body
-    );
-    console.log(response.data.status);
+    console.log(body);
+    try {
+      const response = await axios.post(
+        "http://192.168.0.148:3001/sendMessage",
+        body
+      );
+      console.log(response.data);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const [serviceStarted, setServiceStarted] = useState(false);
@@ -160,7 +171,6 @@ export default function HomeScreen({ navigation }) {
 
   const handleClick = () => {
     if (serviceStarted === false) {
-      sendMessages();
       _subscribeAccelerometer();
       _fastAccelerometer();
       t = setInterval(() => tick(), 100);

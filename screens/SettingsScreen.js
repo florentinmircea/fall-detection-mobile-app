@@ -136,6 +136,7 @@ export default function SettingsScreen({ navigation }) {
                 onPress={handlePhoneClick.bind(this, item, keys[index])}
                 title="Emergency person phone number"
                 data={item}
+                key={index}
               />
             );
           })}
