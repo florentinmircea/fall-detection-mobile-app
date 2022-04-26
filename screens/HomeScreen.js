@@ -299,6 +299,12 @@ export default function HomeScreen({ navigation }) {
     await sound.playAsync();
   }
 
+  const showHospitals = () => {
+    // sendMessages(); need to be uncommented
+    setModalVisible(false);
+    navigation.navigate("Map");
+  };
+
   return (
     // <View style={styles.container}>
     //   <StatusBar style='dark-content' />
@@ -357,6 +363,12 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.modalView}>
               <Text style={styles.modalText}>Fall detected!</Text>
               <Text style={styles.textEmergency}>{timeLeft / 1000}</Text>
+              <Pressable
+                style={[styles.button, styles.buttonMap]}
+                onPress={showHospitals.bind(this)}
+              >
+                <Text style={styles.textStyle}>Show Hospitals</Text>
+              </Pressable>
               <Pressable
                 style={[styles.button, styles.buttonClose]}
                 onPress={() => setUserOK(true)}
@@ -466,6 +478,11 @@ const styles = StyleSheet.create({
   },
   buttonClose: {
     backgroundColor: "green",
+    borderColor: "#000000",
+    borderWidth: 2,
+  },
+  buttonMap: {
+    backgroundColor: "red",
     borderColor: "#000000",
     borderWidth: 2,
   },
