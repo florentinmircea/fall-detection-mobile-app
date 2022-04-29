@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { ImageBackground, StyleSheet, View } from "react-native";
+import { ImageBackground, StyleSheet, View, Text } from "react-native";
 import background from "../assets/background.jpg";
 import Button from "../components/SettingsButtonField";
 import Modal from "../components/SettingsFieldModal";
@@ -33,6 +33,7 @@ export default function SettingsScreen({ navigation }) {
   const [userName, setUserName] = useState("Flo");
   const [emergencyEmail, setEmergencyEmail] = useState("email@gmail.com");
   const [emergencyPhone, setEmergencyPhone] = useState("+40752275966");
+  const [fallsNr, setFallsNr] = useState(0);
 
   const handleNameClick = () => {
     setNameModalVisible(true);
@@ -96,6 +97,19 @@ export default function SettingsScreen({ navigation }) {
     } catch (err) {
       console.log(err.message);
     }
+    let fallNr;
+    try {
+      Firebase.database()
+        .ref("users/" + user.uid + "/fallNr")
+        .on("value", (snapshot) => {
+          fallNr = snapshot.val();
+        });
+      if (typeof fallNr !== "undefined") {
+        setFallsNr(fallNr);
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
   }, []);
 
   return (
@@ -110,6 +124,7 @@ export default function SettingsScreen({ navigation }) {
             color="#fff"
             onPress={handleSignOut}
           />
+
           <AddPersonButton
             disabled={itemsArray.length > 2}
             onPress={handleNewContact}
@@ -152,6 +167,7 @@ export default function SettingsScreen({ navigation }) {
             title="Emergency person phone number"
             data={emergencyPhone.slice(2, emergencyPhone.length)}
           /> */}
+          <Text style={styles.text}>{"Falls detected:" + fallsNr}</Text>
         </View>
 
         <Modal
@@ -201,5 +217,9 @@ const styles = StyleSheet.create({
     flex: 1,
     // justifyContent: "center",
     // alignItems: "center",
+  },
+  text: {
+    fontSize: 20,
+    paddingTop: 40,
   },
 });

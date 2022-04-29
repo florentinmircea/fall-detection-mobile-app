@@ -58,6 +58,30 @@ export default function HomeScreen({ navigation }) {
     }
   }, [timeLeft]);
 
+  const updateFallNumbers = () => {
+    let fallNr;
+    try {
+      Firebase.database()
+        .ref("users/" + user.uid + "/fallNr")
+        .on("value", (snapshot) => {
+          fallNr = snapshot.val();
+        });
+      if (typeof fallNr === "undefined") {
+        Firebase.database()
+          .ref("users/" + user.uid)
+          .child("fallNr")
+          .set(1);
+      } else {
+        Firebase.database()
+          .ref("users/" + user.uid)
+          .child("fallNr")
+          .set(Number(fallNr) + 1);
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
   const sendMessages = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -276,6 +300,7 @@ export default function HomeScreen({ navigation }) {
         setModalVisible(true);
         playSound();
         start();
+        updateFallNumbers();
       }
     }
     // xyzData.length = 0;
