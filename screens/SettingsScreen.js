@@ -97,6 +97,9 @@ export default function SettingsScreen({ navigation }) {
     } catch (err) {
       console.log(err.message);
     }
+  }, []);
+
+  useEffect(() => {
     let fallNr;
     try {
       Firebase.database()
@@ -110,7 +113,7 @@ export default function SettingsScreen({ navigation }) {
     } catch (err) {
       console.log(err.message);
     }
-  }, []);
+  }, [itemsArray]);
 
   return (
     <View style={styles.container}>

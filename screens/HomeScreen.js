@@ -49,8 +49,8 @@ export default function HomeScreen({ navigation }) {
   useEffect(() => {
     if (didMount.current) {
       if (timeLeft <= 0) {
-        Alert.alert("call");
-        // sendMessages(); working but commented during development
+        // Alert.alert("call");
+        sendMessages(); //  working but commented during development
         reset();
       }
     } else {
@@ -123,7 +123,7 @@ export default function HomeScreen({ navigation }) {
     try {
       // "http://192.168.0.148:3001/sendMessage"
       const response = await axios.post(
-        "https://fall-detection-api.loca.lt/",
+        "https://fall-detection-api.loca.lt/sendMessage",
         body
       );
       console.log(response.data);
@@ -326,8 +326,9 @@ export default function HomeScreen({ navigation }) {
   }
 
   const showHospitals = () => {
-    // sendMessages(); need to be uncommented
+    sendMessages(); // need to be uncommented
     setModalVisible(false);
+    reset();
     navigation.navigate("Map");
   };
 
@@ -348,12 +349,12 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar style="auto" />
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        <Text style={styles.text}>Timer {counter}</Text>
+        {/* <Text style={styles.text}>Timer {counter}</Text>
         {serviceStarted === true ? (
           <Text style={styles.text}>
             Accelerometer x: {round(x)} y: {round(y)} z: {round(z)}
           </Text>
-        ) : null}
+        ) : null} */}
         <TouchableOpacity
           onPress={handleClick}
           style={
@@ -368,13 +369,13 @@ export default function HomeScreen({ navigation }) {
           style={styles.buttonSettings}
           onPressIn={() => navigation.navigate("Settings")}
         >
-          <Text style={styles.buttonText}>Settings</Text>
+          <Text style={styles.buttonText}>Settings ⚙️</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttonSettings}
           onPressIn={() => navigation.navigate("Map")}
         >
-          <Text style={styles.buttonText}>Map</Text>
+          <Text style={styles.buttonText}>Map 🗺️</Text>
         </TouchableOpacity>
         <Modal
           animationType="slide"

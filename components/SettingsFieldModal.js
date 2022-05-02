@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
   },
   phone: {
     marginTop: 20,
+    height: 40,
   },
   phoneText: {
     fontSize: 20,

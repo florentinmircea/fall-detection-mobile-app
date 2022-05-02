@@ -20,6 +20,9 @@ export default {
       supportsTablet: true,
       bundleIdentifier: "com.florentin.falldetection",
       buildNumber: "1.0.0",
+      config: {
+        googleMapsApiKey: "AIzaSyAAHrGQxhf9fPNAu6My_k_blsZh7wwutso",
+      },
     },
     android: {
       adaptiveIcon: {
@@ -28,6 +31,11 @@ export default {
       },
       package: "com.florentin.falldetection",
       versionCode: 1,
+      config: {
+        googleMaps: {
+          apiKey: "AIzaSyByizII-0H_82fZuTRIVc6oR-WfICwh_zA",
+        },
+      },
     },
     web: {
       favicon: "./assets/favicon.png",

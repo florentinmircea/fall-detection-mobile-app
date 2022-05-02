@@ -79,6 +79,11 @@ export default function LoginScreen({ navigation }) {
         handlePasswordVisibility={handlePasswordVisibility}
       />
       {loginError ? <ErrorMessage error={loginError} visible={true} /> : null}
+      <RNButton
+        onPress={() => navigation.navigate("Reset Password")}
+        title="Forgot Password?"
+        color="#f98c87"
+      />
       <Button
         onPress={onLogin}
         backgroundColor="#fb5b5a"
@@ -87,12 +92,13 @@ export default function LoginScreen({ navigation }) {
         titleSize={20}
         containerStyle={{
           marginBottom: 24,
+          marginTop: 24,
         }}
       />
       <RNButton
         onPress={() => navigation.navigate("Signup")}
         title="Go to Signup"
-        color="green"
+        color="#f98c87"
       />
     </View>
   );
