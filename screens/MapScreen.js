@@ -6,6 +6,9 @@ import Constants from "expo-constants";
 import axios from "axios";
 // import dummyHospitals from "../dummyHospitals.json";
 import { AntDesign } from "@expo/vector-icons";
+import Polyline from "@mapbox/polyline";
+import getDirections from "react-native-google-maps-directions";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function MapScreen({ navigation }) {
   const [mapRegion, setmapRegion] = useState(null);
@@ -42,25 +45,31 @@ export default function MapScreen({ navigation }) {
       location.coords.latitude
     },${
       location.coords.longitude
-    }&radius=10000&type=point_of_interest&keyword=hospital&key=${
+    }&type=point_of_interest&keyword=hospital&rankby=distance&key=${
       Constants.manifest.extra.mapsKey
     }`;
 
-    console.log(url);
-    console.log(url);
+    // console.log(url);
+    // console.log(url);
 
     const response = await axios.get(url);
-    console.log(response.data);
+    // console.log(response.data);
     setTest(response.data.results.length);
     let hospitals = [];
+    let j = 0;
     for (let i = 0; i < response.data.results.length; i++) {
-      hospitals.push({
-        latitude: response.data.results[i].geometry.location.lat,
-        longitude: response.data.results[i].geometry.location.lng,
-        name: response.data.results[i].name,
-        opened_now: response.data.results[i].opening_hours?.open_now,
-        adresa: response.data.results[i].vicinity,
-      });
+      if (j == 5) {
+        break;
+      } else {
+        hospitals.push({
+          latitude: response.data.results[i].geometry.location.lat,
+          longitude: response.data.results[i].geometry.location.lng,
+          name: response.data.results[i].name,
+          opened_now: response.data.results[i].opening_hours?.open_now,
+          adresa: response.data.results[i].vicinity,
+        });
+        j++;
+      }
     }
     // console.log(hospitals);
     setHospitals(hospitals);
@@ -125,6 +134,7 @@ export default function MapScreen({ navigation }) {
   // );
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [coords, setCoords] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -151,6 +161,77 @@ export default function MapScreen({ navigation }) {
     }
   }, [location]);
 
+  const handleGetDirections = () => {
+    const data = {
+      source: {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      },
+      destination: {
+        latitude: hospitals[0].latitude,
+        longitude: hospitals[0].longitude,
+      },
+      params: [
+        {
+          key: "travelmode",
+          value: "walking",
+        },
+        {
+          key: "dir_action",
+          value: "navigate",
+        },
+      ],
+    };
+    getDirections(data);
+  };
+
+  const getDrawDirections = async (startLoc, destinationLoc) => {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLoc}&destination=${destinationLoc}&mode=walking&key=${Constants.manifest.extra.mapsKey}`;
+      // console.log(url);
+      const response = await axios.get(url);
+      // console.log(response);
+      // console.log(Polyline.decode("idk|Gut~nC_@b@IHEBMgBMeBi@_G"));
+      let points = Polyline.decode(
+        response.data.routes[0].overview_polyline.points
+      );
+      // console.log("points" + points);
+      let coords = points.map((point, index) => {
+        return {
+          latitude: point[0],
+          longitude: point[1],
+        };
+      });
+      // console.log(coords);
+      const newCoords = [];
+      newCoords.push({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      for (let i = 0; i < coords.length; i++) {
+        newCoords.push({
+          latitude: coords[i].latitude,
+          longitude: coords[i].longitude,
+        });
+      }
+      setCoords(newCoords);
+      console.log(newCoords);
+      // console.log("aici");
+      return coords;
+    } catch (error) {
+      return error;
+    }
+  };
+
+  useEffect(() => {
+    if (location && hospitals.length !== 0) {
+      let start = `${location.coords.latitude},${location.coords.longitude}`;
+      let destination = `${hospitals[0].latitude},${hospitals[0].longitude}`;
+      getDrawDirections(start, destination);
+      console.log("draw");
+    }
+  }, [location, hospitals]);
+
   return (
     <View style={styles.container}>
       {location ? (
@@ -175,7 +256,7 @@ export default function MapScreen({ navigation }) {
             title="Current Location"
             pinColor="blue"
           />
-          {console.log(hospitals.length)}
+          {/* {console.log(hospitals.length)} */}
           {hospitals.length !== 0
             ? hospitals.map((item, index) => {
                 return (
@@ -192,6 +273,21 @@ export default function MapScreen({ navigation }) {
                 );
               })
             : null}
+          {/* {console.log(coords.length)} */}
+          {coords.length !== 0 ? (
+            // <MapViewPolyline
+            //   key={index}
+            //   index={index}
+            //   coordinates={item}
+            //   strokeWidth={2}
+            //   strokeColor="blue"
+            // />
+            <MapView.Polyline
+              coordinates={coords}
+              strokeWidth={4}
+              strokeColor="rgba(255,140,0,0.8)"
+            />
+          ) : null}
         </MapView>
       ) : null}
       {errorMsg ? <Text style={styles.loadingText}>{errorMsg}</Text> : null}
@@ -202,7 +298,15 @@ export default function MapScreen({ navigation }) {
         color="black"
         onPress={() => navigation.navigate("Home")}
       />
-      <Text style={{ marginTop: -130 }}>{test}</Text>
+      <Ionicons
+        style={styles.navigate}
+        name="navigate-circle"
+        size={50}
+        color="black"
+        onPress={handleGetDirections}
+      />
+
+      {/* <Text style={{ marginTop: -130 }}>{coords.length}</Text> */}
     </View>
   );
 }
@@ -218,6 +322,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
     left: 10,
+  },
+  navigate: {
+    margin: 5,
+    position: "absolute",
+    top: 40,
+    right: 10,
   },
   loadingText: {
     fontSize: 30,
