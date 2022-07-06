@@ -20,7 +20,6 @@ const styles = StyleSheet.create({
   button: {
     display: "flex",
     paddingVertical: 12,
-    // paddingHorizontal: 32,
     borderRadius: 20,
     elevation: 3,
     backgroundColor: "grey",

@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 
-import { IconButton } from "../components";
 import Firebase from "../config/firebase";
 import { AuthenticatedUserContext } from "../navigation/AuthenticatedUserProvider";
 import { StatusBar } from "expo-status-bar";
@@ -26,18 +25,11 @@ const auth = Firebase.auth();
 
 const image = background;
 
-const initialTimeBeforeAlert = 30 * 1000; // initial time in milliseconds, defaults to 60000
-const timeUnitInterval = 1000; // interval to change remaining time amount, defaults to 1000
+const initialTimeBeforeAlert = 30 * 1000;
+const timeUnitInterval = 1000;
 
 export default function HomeScreen({ navigation }) {
   const { user } = useContext(AuthenticatedUserContext);
-  const handleSignOut = async () => {
-    try {
-      await auth.signOut();
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const [timeLeft, { start, pause, resume, reset }] = useCountDown(
     initialTimeBeforeAlert,
@@ -49,8 +41,7 @@ export default function HomeScreen({ navigation }) {
   useEffect(() => {
     if (didMount.current) {
       if (timeLeft <= 0) {
-        // Alert.alert("call");
-        sendMessages(); //  working but commented during development
+        sendMessages();
         reset();
       }
     } else {
@@ -97,7 +88,6 @@ export default function HomeScreen({ navigation }) {
         .ref("users/" + user.uid + "/contacts")
         .on("value", (snapshot) => {
           let data = snapshot.val();
-          // console.log(snapshot.key);
           if (data !== null) {
             const items = Object.values(data);
             contacts = items;
@@ -121,9 +111,8 @@ export default function HomeScreen({ navigation }) {
     };
     console.log(body);
     try {
-      // "http://192.168.0.148:3001/sendMessage"
       const response = await axios.post(
-        "https://fall-detection-api.loca.lt/sendMessage",
+        "http://192.168.0.148:3001/sendMessage",
         body
       );
       console.log(response.data);
@@ -155,6 +144,8 @@ export default function HomeScreen({ navigation }) {
   const [xyzData, setXyzData] = useState([]);
   const [done, setDone] = useState(false);
 
+  const [ok, setOK] = useState(null);
+
   const webServiceUrl =
     "https://ussouthcentral.services.azureml.net/workspaces/74deb8d5935745aea0b3101bc2519aa7/services/d10d5c59720c43dcb9765f4c364375b8/execute?api-version=2.0&details=true";
 
@@ -176,10 +167,7 @@ export default function HomeScreen({ navigation }) {
     for (let i = 0; i < xyz.length; i++) {
       body.Inputs.input1.Values.push(xyz[i]);
     }
-    // console.log(body);
     const response = await axios.post(webServiceUrl, body, config);
-    // console.log(response.status.toString() === "200");
-    // console.log(response.data.Results.output1.value.Values.length);
     let results = [];
     for (
       let i = 0;
@@ -195,24 +183,18 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleClick = () => {
-    if (serviceStarted === false) {
-      _subscribeAccelerometer();
-      _fastAccelerometer();
-      t = setInterval(() => tick(), 100);
+    if (ok === true) {
+      if (serviceStarted === false) {
+        _subscribeAccelerometer();
+        _fastAccelerometer();
+        t = setInterval(() => tick(), 100);
+      } else {
+        _unsubscribeAccelerometer();
+      }
+      setServiceStarted(!serviceStarted);
     } else {
-      _unsubscribeAccelerometer();
+      Alert.alert("Please enter at least one emergency contact in settings");
     }
-    setServiceStarted(!serviceStarted);
-
-    // setFallDetected(true);
-    // setModalVisible(true);
-    // playSound();
-    // start();
-
-    // eventPrediction([
-    //   ["1", "1", "1"],
-    //   ["1", "0", "2"],
-    // ]);
   };
 
   const _fastAccelerometer = () => {
@@ -238,12 +220,22 @@ export default function HomeScreen({ navigation }) {
 
   const { x, y, z } = dataAccelerometer;
 
-  function round(n) {
-    if (!n) {
-      return 0;
+  useEffect(() => {
+    try {
+      Firebase.database()
+        .ref("users/" + user.uid + "/contacts")
+        .on("value", (snapshot) => {
+          let data = snapshot.val();
+          if (data !== null) {
+            setOK(true);
+          } else {
+            setOK(false);
+          }
+        });
+    } catch (err) {
+      console.log(err.message);
     }
-    return Math.floor(n * 100) / 100;
-  }
+  }, []);
 
   useEffect(() => {
     const { x, y, z } = dataAccelerometer;
@@ -265,11 +257,6 @@ export default function HomeScreen({ navigation }) {
       console.log(xyzData);
       eventPrediction(xyzData);
       setXyzData([]);
-
-      //   console.log(xyzData);
-      //   setFallDetected(true);
-      //   setModalVisible(true);
-      //   console.log(v.toString() + " fall detected");
     }
   }, [dataAccelerometer]);
 
@@ -303,9 +290,6 @@ export default function HomeScreen({ navigation }) {
         updateFallNumbers();
       }
     }
-    // xyzData.length = 0;
-    // predictionResults.length = 0;
-    // setDone(false);
   }, [predictionResults]);
 
   const [sound, setSound] = useState();
@@ -321,40 +305,20 @@ export default function HomeScreen({ navigation }) {
     setSound(sound);
 
     console.log("Playing Sound");
-    // await sound.setIsLoopingAsync(true);
     await sound.playAsync();
   }
 
   const showHospitals = () => {
-    sendMessages(); // need to be uncommented
+    sendMessages();
     setModalVisible(false);
     reset();
     navigation.navigate("Map");
   };
 
   return (
-    // <View style={styles.container}>
-    //   <StatusBar style='dark-content' />
-    //   <View style={styles.row}>
-    //     <Text style={styles.title}>Welcome {user.email}!</Text>
-    //     <IconButton
-    //       name='logout'
-    //       size={24}
-    //       color='#fff'
-    //       onPress={handleSignOut}
-    //     />
-    //   </View>
-    //   <Text style={styles.text}>Your UID is: {user.uid} </Text>
-    // </View>
     <View style={styles.container}>
       <StatusBar style="auto" />
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        {/* <Text style={styles.text}>Timer {counter}</Text>
-        {serviceStarted === true ? (
-          <Text style={styles.text}>
-            Accelerometer x: {round(x)} y: {round(y)} z: {round(z)}
-          </Text>
-        ) : null} */}
         <TouchableOpacity
           onPress={handleClick}
           style={
@@ -409,31 +373,6 @@ export default function HomeScreen({ navigation }) {
     </View>
   );
 }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#e93b81',
-//     paddingTop: 50,
-//     paddingHorizontal: 12
-//   },
-//   row: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     marginBottom: 24
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: '600',
-//     color: '#fff'
-//   },
-//   text: {
-//     fontSize: 16,
-//     fontWeight: 'normal',
-//     color: '#fff'
-//   }
-// });
 
 const styles = StyleSheet.create({
   container: {

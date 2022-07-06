@@ -4,39 +4,13 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import Constants from "expo-constants";
 import axios from "axios";
-// import dummyHospitals from "../dummyHospitals.json";
 import { AntDesign } from "@expo/vector-icons";
 import Polyline from "@mapbox/polyline";
 import getDirections from "react-native-google-maps-directions";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function MapScreen({ navigation }) {
-  const [mapRegion, setmapRegion] = useState(null);
   const [hospitals, setHospitals] = useState([]);
-
-  // const [location, setLocation] = useState(null);
-  // const [errorMsg, setErrorMsg] = useState(null);
-
-  // useEffect(() => {
-  //   (async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== "granted") {
-  //       setErrorMsg("Permission to access location was denied");
-  //       return;
-  //     }
-
-  //     let location = await Location.getCurrentPositionAsync({});
-  //     setLocation(location);
-  //     setmapRegion({
-  //       latitude: location.coords.latitude,
-  //       longitude: location.coords.longitude,
-  //       latitudeDelta: 0.0922,
-  //       longitudeDelta: 0.0421,
-  //     });
-  //     getNearestHospitals(location);
-  //     // console.log(JSON.stringify(location));
-  //   })();
-  // }, []);
 
   const [test, setTest] = useState("initial");
 
@@ -49,11 +23,7 @@ export default function MapScreen({ navigation }) {
       Constants.manifest.extra.mapsKey
     }`;
 
-    // console.log(url);
-    // console.log(url);
-
     const response = await axios.get(url);
-    // console.log(response.data);
     setTest(response.data.results.length);
     let hospitals = [];
     let j = 0;
@@ -71,67 +41,9 @@ export default function MapScreen({ navigation }) {
         j++;
       }
     }
-    // console.log(hospitals);
     setHospitals(hospitals);
   };
 
-  // return (
-  //   <View style={styles.container}>
-  //     {mapRegion !== null ? (
-  //       <MapView
-  //         style={{ alignSelf: "stretch", height: "100%", width: "100%" }}
-  //         region={mapRegion}
-  // provider={PROVIDER_GOOGLE}
-  //       >
-  //         <Marker
-  //           key={0}
-  //           coordinate={mapRegion}
-  //           title="Current Location"
-  //           pinColor="blue"
-  //         />
-  //         {console.log(hospitals.length)}
-  //         {hospitals.length !== 0
-  //           ? hospitals.map((item, index) => {
-  //               return (
-  //                 <Marker
-  //                   key={index + 1}
-  //                   coordinate={{
-  //                     latitude: item.latitude,
-  //                     longitude: item.longitude,
-  //                   }}
-  //                   title={item.name}
-  //                   pinColor="red"
-  //                   description={"Address:" + item.adresa}
-  //                 />
-  //               );
-  //             })
-  //           : null}
-  //       </MapView>
-  //     ) : (
-  //       <Text style={styles.loadingText}>Loading...</Text>
-  //     )}
-  //     {errorMsg !== null ? (
-  //       <Text style={styles.loadingText}>{errorMsg}</Text>
-  //     ) : null}
-  //     <AntDesign
-  //       style={styles.close}
-  //       name="closecircle"
-  //       size={40}
-  //       color="black"
-  //       onPress={() => navigation.navigate("Home")}
-  //     />
-  //     <Text>
-  //       {location !== null
-  //         ? location.coords.latitude + " " + location.coords.longitude
-  //         : "null"}
-  //     </Text>
-  //     <Text>
-  //       {mapRegion !== null
-  //         ? mapRegion.latitude + " " + mapRegion.longitude
-  //         : "null"}
-  //     </Text>
-  //   </View>
-  // );
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [coords, setCoords] = useState([]);
@@ -151,12 +63,6 @@ export default function MapScreen({ navigation }) {
 
   useEffect(() => {
     if (location) {
-      // setmapRegion({
-      //   latitude: location.coords.latitude,
-      //   longitude: location.coords.longitude,
-      //   latitudeDelta: 0.0922,
-      //   longitudeDelta: 0.0421,
-      // });
       getNearestHospitals(location);
     }
   }, [location]);
@@ -188,21 +94,16 @@ export default function MapScreen({ navigation }) {
   const getDrawDirections = async (startLoc, destinationLoc) => {
     try {
       const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLoc}&destination=${destinationLoc}&mode=walking&key=${Constants.manifest.extra.mapsKey}`;
-      // console.log(url);
       const response = await axios.get(url);
-      // console.log(response);
-      // console.log(Polyline.decode("idk|Gut~nC_@b@IHEBMgBMeBi@_G"));
       let points = Polyline.decode(
         response.data.routes[0].overview_polyline.points
       );
-      // console.log("points" + points);
       let coords = points.map((point, index) => {
         return {
           latitude: point[0],
           longitude: point[1],
         };
       });
-      // console.log(coords);
       const newCoords = [];
       newCoords.push({
         latitude: location.coords.latitude,
@@ -216,7 +117,6 @@ export default function MapScreen({ navigation }) {
       }
       setCoords(newCoords);
       console.log(newCoords);
-      // console.log("aici");
       return coords;
     } catch (error) {
       return error;
@@ -256,7 +156,6 @@ export default function MapScreen({ navigation }) {
             title="Current Location"
             pinColor="blue"
           />
-          {/* {console.log(hospitals.length)} */}
           {hospitals.length !== 0
             ? hospitals.map((item, index) => {
                 return (
@@ -273,15 +172,7 @@ export default function MapScreen({ navigation }) {
                 );
               })
             : null}
-          {/* {console.log(coords.length)} */}
           {coords.length !== 0 ? (
-            // <MapViewPolyline
-            //   key={index}
-            //   index={index}
-            //   coordinates={item}
-            //   strokeWidth={2}
-            //   strokeColor="blue"
-            // />
             <MapView.Polyline
               coordinates={coords}
               strokeWidth={4}
@@ -305,8 +196,6 @@ export default function MapScreen({ navigation }) {
         color="black"
         onPress={handleGetDirections}
       />
-
-      {/* <Text style={{ marginTop: -130 }}>{coords.length}</Text> */}
     </View>
   );
 }

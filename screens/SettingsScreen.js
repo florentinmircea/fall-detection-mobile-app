@@ -1,10 +1,8 @@
 import { StatusBar } from "expo-status-bar";
 import { ImageBackground, StyleSheet, View, Text } from "react-native";
 import background from "../assets/background.jpg";
-import Button from "../components/SettingsButtonField";
 import Modal from "../components/SettingsFieldModal";
 import { useState } from "react";
-import PersonCard from "../components/PersonCard";
 import Buttontwo from "../components/Buttontwo";
 import AddPersonButton from "../components/AddPersonButton";
 import { AuthenticatedUserContext } from "../navigation/AuthenticatedUserProvider";
@@ -35,17 +33,7 @@ export default function SettingsScreen({ navigation }) {
   const [emergencyPhone, setEmergencyPhone] = useState("+40752275966");
   const [fallsNr, setFallsNr] = useState(0);
 
-  const handleNameClick = () => {
-    setNameModalVisible(true);
-  };
-
-  const handleEmailClick = () => {
-    setEmailModalVisible(true);
-  };
-
   const handlePhoneClick = (data, key) => {
-    // setPhoneModalVisible(true);
-    // console.log("data" + data.email);
     navigation.navigate("EmergencyPersonCard", { data: data, key: key });
   };
 
@@ -75,7 +63,7 @@ export default function SettingsScreen({ navigation }) {
         .ref("users/" + user.uid + "/contacts")
         .on("value", (snapshot) => {
           snapshot.forEach(function (snapshot3) {
-            console.log(snapshot3.key); // e.g. "-Kb9...gkE"
+            console.log(snapshot3.key);
             keyArr.push(snapshot3.key);
           });
         });
@@ -88,10 +76,11 @@ export default function SettingsScreen({ navigation }) {
         .ref("users/" + user.uid + "/contacts")
         .on("value", (snapshot) => {
           let data = snapshot.val();
-          // console.log(snapshot.key);
           if (data !== null) {
             const items = Object.values(data);
             setItemsArray(items);
+          } else {
+            setItemsArray([]);
           }
         });
     } catch (err) {
@@ -133,22 +122,6 @@ export default function SettingsScreen({ navigation }) {
             onPress={handleNewContact}
           />
         </View>
-        {/* <Button
-          onPress={handleNameClick}
-          title="Your emergency display name"
-          data={userName}
-        /> */}
-        {/* <Button
-          onPress={handleEmailClick}
-          title="Emergency person email"
-          data={emergencyEmail}
-        />
-        <Button
-          onPress={handlePhoneClick}
-          title="Emergency person phone number"
-          data={emergencyPhone.slice(2, emergencyPhone.length)}
-        />  */}
-        {/* <PersonCard /> */}
         <View style={styles.container3}>
           {itemsArray.map((item, index) => {
             return (
@@ -160,17 +133,9 @@ export default function SettingsScreen({ navigation }) {
               />
             );
           })}
-          {/* <Buttontwo
-            onPress={handlePhoneClick}
-            title="Emergency person phone number"
-            data={emergencyPhone.slice(2, emergencyPhone.length)}
-          />
-          <Buttontwo
-            onPress={handlePhoneClick}
-            title="Emergency person phone number"
-            data={emergencyPhone.slice(2, emergencyPhone.length)}
-          /> */}
-          <Text style={styles.text}>{"Falls detected:" + fallsNr}</Text>
+          <Text style={styles.text}>
+            {fallsNr == null ? "Falls detected:0" : "Falls detected:" + fallsNr}
+          </Text>
         </View>
 
         <Modal
@@ -218,8 +183,6 @@ const styles = StyleSheet.create({
   container3: { flex: 0.5, alignItems: "center" },
   image: {
     flex: 1,
-    // justifyContent: "center",
-    // alignItems: "center",
   },
   text: {
     fontSize: 20,

@@ -27,8 +27,17 @@ export default function SignupScreen({ navigation }) {
 
   const onHandleSignup = async () => {
     try {
-      if (email !== "" && password !== "") {
+      if (
+        email !== "" &&
+        password !== "" &&
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email) &&
+        password.length >= 6
+      ) {
         await auth.createUserWithEmailAndPassword(email, password);
+      } else {
+        setSignupError(
+          "Please use a valid email and a password of at least 6 characters"
+        );
       }
     } catch (error) {
       setSignupError(error.message);
@@ -101,7 +110,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#003f5c",
-    // paddingTop: 50,
     paddingTop: 40,
     paddingHorizontal: 12,
     justifyContent: "flex-start",

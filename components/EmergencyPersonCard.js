@@ -7,7 +7,6 @@ import {
   Text,
   Alert,
 } from "react-native";
-import background from "../assets/background.jpg";
 import CustomButton from "../components/SettingsButtonField";
 import Modal from "../components/SettingsFieldModal";
 import { useState } from "react";
