@@ -7,8 +7,6 @@ export default function Buttontwo(props) {
   return (
     <Pressable style={styles.button} onPress={onPress}>
       <Ionicons name="person" size={50} color="black" />
-      {/* <Text style={styles.text}>{title}</Text>
-      <Text style={styles.textData}>{data}</Text> */}
     </Pressable>
   );
 }

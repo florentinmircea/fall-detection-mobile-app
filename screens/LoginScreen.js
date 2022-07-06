@@ -28,8 +28,15 @@ export default function LoginScreen({ navigation }) {
   const onLogin = async () => {
     setLoginError(false);
     try {
-      if (email !== "" && password !== "") {
+      if (
+        email !== "" &&
+        password !== "" &&
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email) &&
+        password.length >= 6
+      ) {
         await auth.signInWithEmailAndPassword(email, password);
+      } else {
+        setLoginError("Please use valid email and password");
       }
     } catch (error) {
       setLoginError(error.message);
@@ -108,7 +115,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#003f5c",
-    // paddingTop: 50,
     paddingTop: 40,
     paddingHorizontal: 12,
     justifyContent: "flex-start",
